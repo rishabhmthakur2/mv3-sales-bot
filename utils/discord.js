@@ -1,7 +1,7 @@
 const { format } = require("date-fns");
 const { Intents, TextChannel } = require("discord.js");
 const Discord = require("discord.js");
-// const { getEthToUSDPrice } = require("./ethPrice");
+const { getEthToUSDPrice } = require("./ethPrice");
 
 const discordSetup = (discordBotToken, discordChannelId) => {
   const discordBot = new Discord.Client({
@@ -30,12 +30,12 @@ const createMessage = async (
     .addFields(
       { name: "Name", value: `${metadata.name}` },
       { name: "Amount (Eth)", value: `${value} Eth` },
-      // {
-      //   name: "Amount (USD",
-      //   value: `${
-      //     parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
-      //   } USD}`,
-      // },
+      {
+        name: "Amount (USD",
+        value: `${
+          parseFloat(value) * parseFloat(await getEthToUSDPrice())
+        } USD}`,
+      },
       { name: "Buyer", value: buyer },
       { name: "Seller", value: seller },
       {
@@ -46,10 +46,7 @@ const createMessage = async (
     .setURL(
       `https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${tokenId}`
     )
-    // .setImage(metadata.image);
-    .setImage(
-      "https://lh3.googleusercontent.com/WCyGH5HOUBs1Yt0Z5xJAOp6rzFCaN_pgkm2FL0dncTslsXBOf4DBXqRU9M-eMfxzwebGtM31Iy1YGP8IzAidieoAx9xDVTx4j7U8Dw=w600"
-    );
+    .setImage(metadata.image);
 
 module.exports = {
   createMessage,

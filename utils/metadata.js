@@ -8,7 +8,7 @@ const fetchMetadata = async (uri) => {
   const metadata = await axios.get(`https://ipfs.io/ipfs/${ipfsURL}`);
   return {
     name: metadata.data.name,
-    image: getIPFSURL(metadata.data.image),
+    image: `https://ipfs.io/ipfs/${getIPFSURL(metadata.data.image)}`,
   };
 };
 

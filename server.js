@@ -542,7 +542,7 @@ let getEvents = async () => {
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14609845, //await web3.eth.getBlockNumber() // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: await web3.eth.getBlockNumber() // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
@@ -653,7 +653,6 @@ let getEvents = async () => {
               console.log({ uri });
               const metadata = await fetchMetadata(uri);
               console.log({ metadata });
-              console.log("metadata-----image-----", metadata.image);
               const discordMessage = createMessage(
                 metadata,
                 value.toFixed(),
