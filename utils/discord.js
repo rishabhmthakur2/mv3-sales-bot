@@ -46,7 +46,10 @@ const createMessage = async (
     .setURL(
       `https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${tokenId}`
     )
-    .setImage(metadata.image);
+    // .setImage(metadata.image);
+    .setImage(
+      "https://lh3.googleusercontent.com/WCyGH5HOUBs1Yt0Z5xJAOp6rzFCaN_pgkm2FL0dncTslsXBOf4DBXqRU9M-eMfxzwebGtM31Iy1YGP8IzAidieoAx9xDVTx4j7U8Dw=w600"
+    );
 
 module.exports = {
   createMessage,
