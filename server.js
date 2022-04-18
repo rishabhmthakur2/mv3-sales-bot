@@ -653,7 +653,8 @@ let getEvents = async () => {
               console.log({ uri });
               const metadata = await fetchMetadata(uri);
               console.log({ metadata });
-              discordMessage = createMessage(
+              console.log("metadata-----image-----", metadata.image);
+              const discordMessage = createMessage(
                 metadata,
                 value.toFixed(),
                 res.returnValues.to,
@@ -661,7 +662,9 @@ let getEvents = async () => {
                 block.timestamp,
                 res.returnValues.tokenId
               );
-              await channel.send({ embeds: [discordMessage] });
+              const returnMessage = await discordMessage;
+              console.log(returnMessage);
+              await channel.send({ embeds: [returnMessage] });
             } catch (e) {
               console.error(e);
             }
