@@ -33,7 +33,7 @@ const createMessage = async (
       {
         name: "Amount (USD",
         value: `${
-          parseFloat(value) * parseFloat(await getEthToUSDPrice())
+          parseFloat(value) * parseFloat(await getEthToUSDPrice()).toFixed(2)
         } USD}`,
       },
       { name: "Buyer", value: buyer },
