@@ -16,6 +16,7 @@
     "bignumber.js": "^9.0.2",
     "dotenv": "^8.2.0",
     "mongodb": "^4.5.0",
+    "twitter-api-v2": "^1.12.0",
     "web3": "^1.4.0"
   }
 }
