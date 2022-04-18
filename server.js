@@ -1,11 +1,12 @@
-var Web3 = require("web3");
+const { TwitterApi } = require('twitter-api-v2');
+const Web3 = require("web3");
 const axios = require("axios");
 const BN = require("bignumber.js");
 const fs = require("fs");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 // Environment file used to host API keys
-const dotenv = require("dotenv"); 
+const dotenv = require("dotenv");
 require("dotenv").config();
 
 // Setting up connection config for MongoDB
@@ -14,6 +15,14 @@ const mongoClient = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
+});
+
+// Setting up Twitter's Client
+const twitterClient = new TwitterApi({
+  appKey: process.env.TWTR_API_KEY,
+  appSecret: process.env.TWTR_API_KEY_SECRET,
+  accessToken: process.env.TWTR_ACCESS_TOKEN,
+  accessSecret: process.env.TWTR_ACCESS_TOKEN_SECRET
 });
 
 // Setting up the WETH Address. Will be used later to check if a transaction was paid using WETH instead of ETH
@@ -35,8 +44,8 @@ let getEvents = async () => {
     },
   };
 
-  // Setting Infura as the Web Provider 
-  var web3 = new Web3(process.env.WEB3_PROVIDER);
+  // Setting Infura as the Web Provider
+  const web3 = new Web3(process.env.WEB3_PROVIDER);
   web3.setProvider(
     new Web3.providers.WebsocketProvider(
       process.env.WEB3_SOCKET_PROVIDER,
@@ -46,7 +55,7 @@ let getEvents = async () => {
 
   // Initializing the contract with Web3 using ABI for ERC721A
   // Contract address for MV3
-  var myContract = await new web3.eth.Contract(
+  const myContract = await new web3.eth.Contract(
     [
       {
         anonymous: false,
@@ -334,9 +343,9 @@ let getEvents = async () => {
         type: "function",
       },
     ],
-    "0x23581767a106ae21c074b2276d25e5c3e136a68b" 
+    "0x23581767a106ae21c074b2276d25e5c3e136a68b"
   );
-  
+
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
@@ -359,7 +368,7 @@ let getEvents = async () => {
       // Consoling the Transaction Receipt Logs
       console.log(txReceipt.logs);
       txReceipt?.logs.forEach((currentLog) => {
-        
+
         // Getting To, From and Value using the Transfer topic
         if (
           currentLog.topics[2]?.toLowerCase() ==
@@ -377,7 +386,7 @@ let getEvents = async () => {
       });
       // Getting Transaction value if paid via Eth
       let value = new BN(web3.utils.fromWei(tx.value));
-      // Conmsoling the transaction Value - Eth or WEth
+      // Consoling the transaction Value - Eth or WEth
       console.log(
         `WETH Value: ${wethValue.toFixed()}, ETH Value: ${value.toFixed()}`
       );
@@ -397,9 +406,7 @@ let getEvents = async () => {
 
         // Checking if the transfer was a mint or a sale
         if (
-          res.returnValues.from !=
-            "0x0000000000000000000000000000000000000000" &&
-          parseFloat(value.toFixed()) > 0
+          res.returnValues.from != "0x0000000000000000000000000000000000000000" && parseFloat(value.toFixed()) > 0
         ) {
           // Consoling the Message Block generate above
           console.log(message);
@@ -414,16 +421,22 @@ let getEvents = async () => {
               to: res.returnValues.to,
               timestamp: block.timestamp,
             });
-            if (previousRecords == undefined) {
+            if (previousRecords === undefined) {
               // If transaction is new, we add it to the Database
               const result = await collection.insertOne(message);
-              console.log(
-                `Adding transaction to database with id: ${result.insertedId.toString()}`
-              );
+              console.log(`Adding transaction to database with id: ${result.insertedId.toString()}`);
 
-              /*
-              --------Twitter API Call-----------
-              */
+              /**
+               * TODO: Remove me once implemented
+               * Data needed: Token name/title, value(ETH, possibly USD too?), OpenSea URL
+               * Let Twitter take care of the token preview/image
+               */
+              const tweet = "";
+              try {
+                await twitterClient.v2.tweet(tweet);
+              } catch (e) {
+                console.error(e);
+              }
 
             } else {
               console.log("Duplicate Transaction!");
