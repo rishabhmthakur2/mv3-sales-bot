@@ -15,6 +15,7 @@
     "axios": "^0.21.4",
     "bignumber.js": "^9.0.2",
     "dotenv": "^8.2.0",
+    "eth-price": "^0.1.5",
     "mongodb": "^4.5.0",
     "twitter-api-v2": "^1.12.0",
     "web3": "^1.4.0"

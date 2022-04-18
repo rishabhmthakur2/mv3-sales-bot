@@ -1,9 +1,10 @@
-const { TwitterApi } = require('twitter-api-v2');
+const { TwitterApi } = require("twitter-api-v2");
 const Web3 = require("web3");
 const axios = require("axios");
 const BN = require("bignumber.js");
 const fs = require("fs");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const { getEthToUSDPrice } = require("./utils/ethPrice");
 
 // Environment file used to host API keys
 const dotenv = require("dotenv");
@@ -22,7 +23,7 @@ const twitterClient = new TwitterApi({
   appKey: process.env.TWTR_API_KEY,
   appSecret: process.env.TWTR_API_KEY_SECRET,
   accessToken: process.env.TWTR_ACCESS_TOKEN,
-  accessSecret: process.env.TWTR_ACCESS_TOKEN_SECRET
+  accessSecret: process.env.TWTR_ACCESS_TOKEN_SECRET,
 });
 
 // Setting up the WETH Address. Will be used later to check if a transaction was paid using WETH instead of ETH
@@ -343,19 +344,18 @@ let getEvents = async () => {
         type: "function",
       },
     ],
-    "0x23581767a106ae21c074b2276d25e5c3e136a68b"
+    "0x2a48420d75777af4c99970c0ed3c25effd1c08be"
   );
 
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: 14607336, //await web3.eth.getBlockNumber() // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
     })
     .on("data", async function (res) {
-
       // Getting the Transaction Hash and Receipt
       const tx = await web3.eth.getTransaction(res.transactionHash);
       const txReceipt = await web3.eth.getTransactionReceipt(
@@ -368,7 +368,6 @@ let getEvents = async () => {
       // Consoling the Transaction Receipt Logs
       console.log(txReceipt.logs);
       txReceipt?.logs.forEach((currentLog) => {
-
         // Getting To, From and Value using the Transfer topic
         if (
           currentLog.topics[2]?.toLowerCase() ==
@@ -406,7 +405,9 @@ let getEvents = async () => {
 
         // Checking if the transfer was a mint or a sale
         if (
-          res.returnValues.from != "0x0000000000000000000000000000000000000000" && parseFloat(value.toFixed()) > 0
+          res.returnValues.from !=
+            "0x0000000000000000000000000000000000000000" &&
+          parseFloat(value.toFixed()) > 0
         ) {
           // Consoling the Message Block generate above
           console.log(message);
@@ -421,23 +422,34 @@ let getEvents = async () => {
               to: res.returnValues.to,
               timestamp: block.timestamp,
             });
-            if (previousRecords === undefined) {
+            if (previousRecords == undefined) {
               // If transaction is new, we add it to the Database
               const result = await collection.insertOne(message);
-              console.log(`Adding transaction to database with id: ${result.insertedId.toString()}`);
+              console.log(
+                `Adding transaction to database with id: ${result.insertedId.toString()}`
+              );
 
               /**
                * TODO: Remove me once implemented
                * Data needed: Token name/title, value(ETH, possibly USD too?), OpenSea URL
                * Let Twitter take care of the token preview/image
                */
-              const tweet = "";
+              const USDPrice = parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
+              const tweet = `MV3 Access Pass ${
+                message.tokenId
+              } just got sold for ${
+                message.value
+              } Eth (${USDPrice} USD)!\
+              https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${
+                message.tokenId
+              }\
+              https://etherscan.io/tx/${tx.hash}`;
+              console.log(tweet);
               try {
                 await twitterClient.v2.tweet(tweet);
               } catch (e) {
                 console.error(e);
               }
-
             } else {
               console.log("Duplicate Transaction!");
             }
