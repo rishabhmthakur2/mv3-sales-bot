@@ -627,7 +627,7 @@ let getEvents = async () => {
              * Let Twitter take care of the token preview/image
              */
             // const USDPrice =
-            //   parseFloat(message.value) * parseFloat(await getEthToUSDPrice());
+            //   parseFloat(message.value) * parseFloat(await getEthToUSDPrice()).toFixed(2);
             // const tweet = `MV3 Access Pass ${message.tokenId} just got sold for ${message.value} Eth (${USDPrice} USD)!\
             //   https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${message.tokenId}\
             //   https://etherscan.io/tx/${tx.hash}`;
