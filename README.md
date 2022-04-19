@@ -63,6 +63,8 @@ View the next section for more info on this!
 
 And voila!
 
+To run it in production, you can host this bot on Heroku or EC2 or any similar service that supports Node.js!
+
 ## Preparing your applications to run the bot
 
 To run this bot, we need a MongoDB cloud cluster, relevant keys for Twitter and Discord.
