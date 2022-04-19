@@ -29,7 +29,7 @@ const createMessage = async (
     .setTitle(`${metadata.name} sold!`)
     .addFields(
       { name: "Name", value: `${metadata.name}` },
-      { name: "Amount (Eth)", value: `${value} Eth` },
+      { name: "Amount (ETH)", value: `${value} ETH` },
       {
         name: "Amount (USD)",
         value: `${
