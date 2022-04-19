@@ -1,4 +1,4 @@
-const { format } = require("date-fns");
+const { format, parse } = require("date-fns");
 const { Intents, TextChannel } = require("discord.js");
 const Discord = require("discord.js");
 const { getEthToUSDPrice } = require("./ethPrice");
@@ -31,10 +31,10 @@ const createMessage = async (
       { name: "Name", value: `${metadata.name}` },
       { name: "Amount (Eth)", value: `${value} Eth` },
       {
-        name: "Amount (USD",
+        name: "Amount (USD)",
         value: `${
-          parseFloat(value) * parseFloat(await getEthToUSDPrice()).toFixed(2)
-        } USD}`,
+          parseFloat(parseFloat(value) * parseFloat(await getEthToUSDPrice())).toFixed(2)
+        } USD`,
       },
       { name: "Buyer", value: buyer },
       { name: "Seller", value: seller },
