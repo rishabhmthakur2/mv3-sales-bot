@@ -17,9 +17,10 @@ const sendTweet = async (message, txHash) => {
   const USDPrice = parseFloat(
     parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
   ).toFixed(2);
-  const tweet = `MV3 Access Pass ${message.tokenId} just got sold for ${message.value} Eth (${USDPrice} USD)!\
-              https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${message.tokenId}\
-              https://etherscan.io/tx/${txHash}`;
+  const tweet =
+    `MV3 Access Pass ${message.tokenId} just got sold for ${message.value} Eth (${USDPrice} USD)! \n` +
+    `https://etherscan.io/tx/${txHash} \n` +
+    `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
   console.log(tweet);
   try {
     const tweetData = await twitterClient.v2.tweet(tweet);

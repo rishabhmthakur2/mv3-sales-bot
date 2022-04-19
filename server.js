@@ -47,13 +47,13 @@ let getEvents = async () => {
   // Contract address for MV3
   const myContract = await new web3.eth.Contract(
     abi,
-    "0x2a48420D75777aF4c99970C0ED3C25effD1C08be"
+    process.env.CONTRACT_ADDRESS
   );
 
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14612020, //await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: 14612020 //await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });

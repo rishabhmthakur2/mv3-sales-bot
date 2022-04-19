@@ -44,7 +44,7 @@ const createMessage = async (
       }
     )
     .setURL(
-      `https://opensea.io/assets/0x2a48420d75777af4c99970c0ed3c25effd1c08be/${tokenId}`
+      `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${tokenId}`
     )
     .setImage(metadata.image);
 
