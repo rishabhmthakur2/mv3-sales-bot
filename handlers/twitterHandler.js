@@ -18,7 +18,7 @@ const sendTweet = async (message, txHash) => {
     parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
   ).toFixed(2);
   const tweet =
-    `MV3 Access Pass ${message.tokenId} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
+    `${process.env.NFT_NAME ? process.env.NFT_NAME : "MV3 Access Pass" } ${message.tokenId} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
     `https://etherscan.io/tx/${txHash} \n` +
     `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
   try {
