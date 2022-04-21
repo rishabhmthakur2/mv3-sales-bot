@@ -17,7 +17,8 @@ const discordSetup = (discordBotToken, discordChannelId) => {
 };
 
 const createMessage = async (
-  metadata,
+  name,
+  image,
   value,
   buyer,
   seller,
@@ -26,15 +27,15 @@ const createMessage = async (
 ) =>
   new Discord.MessageEmbed()
     .setColor("#66ff82")
-    .setTitle(`${metadata.name} sold!`)
+    .setTitle(`${name} sold!`)
     .addFields(
-      { name: "Name", value: `${metadata.name}` },
+      { name: "Name", value: `${name}` },
       { name: "Amount (ETH)", value: `${value} ETH` },
       {
         name: "Amount (USD)",
-        value: `${
-          parseFloat(parseFloat(value) * parseFloat(await getEthToUSDPrice())).toFixed(2)
-        } USD`,
+        value: `${parseFloat(
+          parseFloat(value) * parseFloat(await getEthToUSDPrice())
+        ).toFixed(2)} USD`,
       },
       { name: "Buyer", value: buyer },
       { name: "Seller", value: seller },
@@ -46,7 +47,7 @@ const createMessage = async (
     .setURL(
       `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${tokenId}`
     )
-    .setImage(metadata.image);
+    .setImage(image);
 
 module.exports = {
   createMessage,

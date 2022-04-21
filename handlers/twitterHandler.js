@@ -13,13 +13,13 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWTR_ACCESS_TOKEN_SECRET,
 });
 
-const sendTweet = async (message, txHash) => {
+const sendTweet = async (message) => {
   const USDPrice = parseFloat(
     parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
   ).toFixed(2);
   const tweet =
-    `${process.env.NFT_NAME ? process.env.NFT_NAME : "MV3 Access Pass" } ${message.tokenId} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
-    `https://etherscan.io/tx/${txHash} \n` +
+    `${message.name} ${message.tokenId} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
+    `https://etherscan.io/tx/${message.txHash} \n` +
     `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
   try {
     const tweetData = await twitterClient.v2.tweet(tweet);
