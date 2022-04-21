@@ -23,20 +23,20 @@ const getCollection = async () => {
   }
 };
 
-const checkDataDuplicate = async (from, to, timestamp) => {
+const checkDataDuplicate = async (from, to, timestamp, txHash) => {
   try {
     const collection = await getCollection();
-    console.log({ collection });
     // Checking if the there was a sync error and the same transaction already exists in the databse
     const previousRecords = await collection.findOne({
       from,
       to,
       timestamp,
+      txHash,
     });
     if (previousRecords == undefined) {
       return false;
     } else {
-      console.log(`Transaction is a duplicate`);
+      console.log({message: `Transaction is a duplicate`});
       return true;
     }
   } catch (e) {
@@ -48,7 +48,6 @@ const insertRecordToMongo = async (message) => {
   try {
     const collection = await getCollection();
     const newRecord = await collection.insertOne(message);
-    console.log({ newRecord });
     return newRecord;
   } catch (e) {
     console.error(e);
