@@ -10,6 +10,9 @@ const {
 const { sendDiscordMessage } = require("./handlers/discordHandler");
 const { sendTweet } = require("./handlers/twitterHandler");
 
+// Util imports
+const { fetchMetadata } = require("./utils/metadata");
+
 // Environment file used to host API keys
 const dotenv = require("dotenv");
 require("dotenv").config();
@@ -86,7 +89,7 @@ let getEvents = async () => {
             // Getting the Block of Transaction
             const block = await web3.eth.getBlock(res.blockNumber);
             // Creating a JSON that will hold all the data
-            const message = {
+            let message = {
               value: value.toFixed(), // Value of transaction
               to: res.returnValues.to, // NFT Transferred To (Buyer)
               from: res.returnValues.from, // NFT Transferred From (Seller)
@@ -115,15 +118,23 @@ let getEvents = async () => {
                   console.log({
                     message: `Adding transaction to database with id: ${newRecord.insertedId.toString()}`,
                   });
+                  const uri = await myContract.methods
+                    .tokenURI(message.tokenId)
+                    .call();
+                  const metadata = await fetchMetadata(uri);
+                  message = {
+                    ...message,
+                    name: metadata.name,
+                    image: metadata.image,
+                  };
                   try {
-                    const tweetData = await sendTweet(message, tx.hash);
+                    const tweetData = await sendTweet(message);
                     console.log({ tweetData });
                   } catch (e) {
                     console.error(e);
                   }
                   try {
                     const discordMessageData = await sendDiscordMessage(
-                      myContract,
                       message
                     );
                     console.log({ discordMessageData });
