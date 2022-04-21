@@ -14,6 +14,8 @@ const { sendTweet } = require("./handlers/twitterHandler");
 const dotenv = require("dotenv");
 require("dotenv").config();
 
+const PORT = process.env.PORT;
+
 // Setting up the WETH Address. Will be used later to check if a transaction was paid using WETH instead of ETH
 const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2".toLowerCase();
 
