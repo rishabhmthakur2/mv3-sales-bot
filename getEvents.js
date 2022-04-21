@@ -53,7 +53,7 @@ let getEvents = async () => {
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14626826// await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
