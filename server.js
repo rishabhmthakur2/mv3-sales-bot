@@ -53,7 +53,7 @@ let getEvents = async () => {
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14625792 //await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
@@ -64,88 +64,80 @@ let getEvents = async () => {
       const txReceipt = await web3.eth.getTransactionReceipt(
         res.transactionHash
       );
-
-      // Initializing a Big Number with 0 for storing the transaction value later
-      let wethValue = new BN(0);
-
-      // Consoling the Transaction Receipt Logs
-      console.log(txReceipt.logs);
-      txReceipt?.logs.forEach((currentLog) => {
-        // Getting To, From and Value using the Transfer topic
+      const typesArray = [
+        { type: "bytes32", name: "buyHash" },
+        { type: "bytes32", name: "sellHash" },
+        { type: "uint256", name: "price" },
+      ];
+      txReceipt?.logs.forEach(async (log) => {
         if (
-          currentLog.topics[2]?.toLowerCase() ==
-            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase() &&
-          currentLog.address.toLowerCase() == WETH_ADDRESS &&
-          currentLog.topics[0]?.toLowerCase() ==
-            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef".toLowerCase()
+          log.topics[0] ===
+            "0xc4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9" &&
+          log.topics[1]?.toLowerCase() ==
+            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase()
         ) {
-          // Getting Transaction Value (if paid with WEth)
-          const v = `${parseInt(currentLog.data)}`;
-          console.log(`Weth value found ${v}`);
-          // Converting from Wei to WEth
-          wethValue = wethValue.plus(web3.utils.fromWei(v));
-        }
-      });
-      // Getting Transaction value if paid via Eth
-      let value = new BN(web3.utils.fromWei(tx.value));
-      // Consoling the transaction Value - Eth or WEth
-      console.log(
-        `WETH Value: ${wethValue.toFixed()}, ETH Value: ${value.toFixed()}`
-      );
-      // Setting value to WEth if Eth is empty i.e. transaction occured using WEth
-      value = value.gt(0) ? value : wethValue;
-      if (value.gt(0)) {
-        // Getting the Block of Transaction
-        const block = await web3.eth.getBlock(res.blockNumber);
-        // Creating a JSON that will hold all the data
-        const message = {
-          value: value.toFixed(), // Value of transaction
-          to: res.returnValues.to, // NFT Transferred To (Buyer)
-          from: res.returnValues.from, // NFT Transferred From (Seller)
-          timestamp: block.timestamp, // Timestamp of the transaction (in UNIX)
-          tokenId: res.returnValues.tokenId, // Token ID of the NFT transferred/Sold
-        };
+          const decodedParameters = web3.eth.abi.decodeParameters(
+            typesArray,
+            log.data
+          );
+          const v = `${parseInt(decodedParameters.price)}`;
+          const value = new BN(web3.utils.fromWei(v));
+          if (value.gt(0)) {
+            // Getting the Block of Transaction
+            const block = await web3.eth.getBlock(res.blockNumber);
+            // Creating a JSON that will hold all the data
+            const message = {
+              value: value.toFixed(), // Value of transaction
+              to: res.returnValues.to, // NFT Transferred To (Buyer)
+              from: res.returnValues.from, // NFT Transferred From (Seller)
+              timestamp: block.timestamp, // Timestamp of the transaction (in UNIX)
+              tokenId: res.returnValues.tokenId, // Token ID of the NFT transferred/Sold
+              txHash: res.transactionHash,
+            };
 
-        // Checking if the transfer was a mint or a sale
-        if (
-          res.returnValues.from !=
-            "0x0000000000000000000000000000000000000000" &&
-          parseFloat(value.toFixed()) > 0
-        ) {
-          // Consoling the Message Block generate above
-          console.log(message);
-          try {
-            const isDuplicate = await checkDataDuplicate(
-              message.from,
-              message.to,
-              message.timestamp
-            );
-            if (!isDuplicate) {
-              const newRecord = await insertRecordToMongo(message);
-              console.log(
-                `Adding transaction to database with id: ${newRecord.insertedId.toString()}`
-              );
+            // Checking if the transfer was a mint or a sale
+            if (
+              res.returnValues.from !=
+                "0x0000000000000000000000000000000000000000" &&
+              parseFloat(value.toFixed()) > 0
+            ) {
+              // Consoling the Message Block generate above
+              console.log({ message });
+              try {
+                const isDuplicate = await checkDataDuplicate(
+                  message.from,
+                  message.to,
+                  message.timestamp,
+                  message.txHash
+                );
+                if (!isDuplicate) {
+                  const newRecord = await insertRecordToMongo(message);
+                  console.log({
+                    message: `Adding transaction to database with id: ${newRecord.insertedId.toString()}`,
+                  });
+                  try {
+                    const tweetData = await sendTweet(message, tx.hash);
+                    console.log({ tweetData });
+                  } catch (e) {
+                    console.error(e);
+                  }
+                  try {
+                    const discordMessageData = await sendDiscordMessage(
+                      myContract,
+                      message
+                    );
+                    console.log({ discordMessageData });
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+              } catch (e) {
+                console.error(e);
+              }
             }
-            try {
-              const tweetData = await sendTweet(message, tx.hash);
-              console.log({ tweetData });
-            } catch (e) {
-              console.error(e);
-            }
-            try {
-              const discordMessageData = await sendDiscordMessage(
-                myContract,
-                message
-              );
-              console.log({ discordMessageData });
-            } catch (e) {
-              console.error(e);
-            }
-          } catch (e) {
-            console.error(e);ƒ
           }
         }
-      }
+      });
     })
     .on("error", function (err, receipt) {
       console.log({ err });

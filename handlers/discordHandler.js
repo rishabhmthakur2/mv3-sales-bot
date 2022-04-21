@@ -11,7 +11,6 @@ const sendDiscordMessage = async (myContract, message) => {
       process.env.DISCORD_BOT_TOKEN,
       process.env.DISCORD_CHANNEL_ID
     );
-    console.log({ channel });
     const uri = await myContract.methods.tokenURI(message.tokenId).call();
     const metadata = await fetchMetadata(uri);
     const discordMessage = createMessage(
