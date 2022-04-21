@@ -21,7 +21,6 @@ const sendTweet = async (message, txHash) => {
     `MV3 Access Pass ${message.tokenId} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
     `https://etherscan.io/tx/${txHash} \n` +
     `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
-  console.log(tweet);
   try {
     const tweetData = await twitterClient.v2.tweet(tweet);
     return tweetData;
