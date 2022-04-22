@@ -27,12 +27,12 @@ let getEvents = async () => {
     reconnect: {
       auto: true,
       delay: 5000, // ms
-      maxAttempts: 5,
+      maxAttempts: 5000,
       onTimeout: false,
     },
     clientConfig: {
-      maxReceivedFrameSize: 1000000000000000,
-      maxReceivedMessageSize: 1000000000000000,
+      maxReceivedFrameSize: 1000000000000000000000,
+      maxReceivedMessageSize: 1000000000000000000000,
     },
   };
 
