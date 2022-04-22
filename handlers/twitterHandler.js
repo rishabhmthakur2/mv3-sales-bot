@@ -18,7 +18,7 @@ const sendTweet = async (message) => {
     parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
   ).toFixed(2);
   const tweet =
-    `${message.name} just got sold for ${message.value} ETH (${USDPrice} USD)! \n` +
+    `${message.name} was just purchased for ${message.value} ETH (${USDPrice} USD)! \n` +
     `https://etherscan.io/tx/${message.txHash} \n` +
     `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
   try {
