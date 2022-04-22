@@ -95,7 +95,7 @@ let getEvents = async () => {
               from: res.returnValues.from, // NFT Transferred From (Seller)
               timestamp: block.timestamp, // Timestamp of the transaction (in UNIX)
               tokenId: res.returnValues.tokenId, // Token ID of the NFT transferred/Sold
-              txHash: res.transactionHash,
+              txHash: res.transactionHash, // Transaction Hash
             };
 
             // Checking if the transfer was a mint or a sale
