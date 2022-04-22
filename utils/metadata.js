@@ -15,7 +15,6 @@ const fetchMetadata = async (uri) => {
   } else {
     metadata = await axios.get(uri);
   }
-  console.log({ metadata });
   return {
     name: metadata.data.name,
     image:
