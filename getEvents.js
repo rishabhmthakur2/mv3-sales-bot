@@ -56,7 +56,7 @@ let getEvents = async () => {
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14635349 // await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
@@ -76,8 +76,9 @@ let getEvents = async () => {
         if (
           log.topics[0] ===
             "0xc4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9" &&
-          log.topics[1]?.toLowerCase() ==
-            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase()
+          (log.topics[1]?.toLowerCase() ==
+            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase() || log.topics[2]?.toLowerCase() ==
+            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase()) 
         ) {
           const decodedParameters = web3.eth.abi.decodeParameters(
             typesArray,
