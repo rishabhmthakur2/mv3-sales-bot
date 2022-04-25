@@ -1,8 +1,8 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
 // Environment file used to host API keys
-const dotenv = require("dotenv");
-require("dotenv").config();
+require('dotenv');
+require('dotenv').config();
 
 // Setting up connection config for MongoDB
 const uri = process.env.MONGO_URL;
@@ -15,11 +15,12 @@ const mongoClient = new MongoClient(uri, {
 const getCollection = async () => {
   try {
     await mongoClient.connect();
-    const database = mongoClient.db("mv3");
-    const collection = database.collection("mv3-sales");
-    return collection;
+    // TODO: add to .env
+    const database = mongoClient.db('mv3');
+    return database.collection('mv3-sales');
   } catch (e) {
     console.error(e);
+    return 'An error occurred.';
   }
 };
 
@@ -33,24 +34,24 @@ const checkDataDuplicate = async (from, to, timestamp, txHash) => {
       timestamp,
       txHash,
     });
-    if (previousRecords == undefined) {
+    if (previousRecords === undefined) {
       return false;
-    } else {
-      console.log({message: `Transaction is a duplicate`});
-      return true;
     }
+    console.log({ message: 'Transaction is a duplicate' });
+    return true;
   } catch (e) {
     console.error(e);
+    return 'An error occurred.';
   }
 };
 
 const insertRecordToMongo = async (message) => {
   try {
     const collection = await getCollection();
-    const newRecord = await collection.insertOne(message);
-    return newRecord;
+    return collection.insertOne(message);
   } catch (e) {
     console.error(e);
+    return 'An error occurred.';
   }
 };
 

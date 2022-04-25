@@ -1,9 +1,9 @@
-const { TwitterApi } = require("twitter-api-v2");
-const { getEthToUSDPrice } = require("../utils/ethPrice");
+const { TwitterApi } = require('twitter-api-v2');
+const { getEthToUSDPrice } = require('../utils/ethPrice');
 
 // Environment file used to host API keys
-const dotenv = require("dotenv");
-require("dotenv").config();
+require('dotenv');
+require('dotenv').config();
 
 // Setting up Twitter's Client
 const twitterClient = new TwitterApi({
@@ -15,17 +15,16 @@ const twitterClient = new TwitterApi({
 
 const sendTweet = async (message) => {
   const USDPrice = parseFloat(
-    parseFloat(message.value) * parseFloat(await getEthToUSDPrice())
+    parseFloat(message.value) * parseFloat(await getEthToUSDPrice()),
   ).toFixed(2);
-  const tweet =
-    `${message.name} was just purchased for ${message.value} ETH (${USDPrice} USD)! \n` +
-    `https://etherscan.io/tx/${message.txHash} \n` +
-    `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
+  const tweet = `${message.name} was just purchased for ${message.value} ETH (${USDPrice} USD)! \n`
+    + `https://etherscan.io/tx/${message.txHash} \n`
+    + `https://opensea.io/assets/${process.env.CONTRACT_ADDRESS}/${message.tokenId}`;
   try {
-    const tweetData = await twitterClient.v2.tweet(tweet);
-    return tweetData;
+    return twitterClient.v2.tweet(tweet);
   } catch (e) {
     console.error(e);
+    return 'An error occurred.';
   }
 };
 
