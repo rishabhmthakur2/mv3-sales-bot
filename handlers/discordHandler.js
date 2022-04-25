@@ -1,14 +1,14 @@
-const { discordSetup, createMessage } = require("../utils/discord");
+require('dotenv');
+const { discordSetup, createMessage } = require('../utils/discord');
 
 // Environment file used to host API keys
-const dotenv = require("dotenv");
-require("dotenv").config();
+require('dotenv').config();
 
 const sendDiscordMessage = async (message) => {
   try {
     const channel = await discordSetup(
       process.env.DISCORD_BOT_TOKEN,
-      process.env.DISCORD_CHANNEL_ID
+      process.env.DISCORD_CHANNEL_ID,
     );
 
     const discordMessage = createMessage(
@@ -18,13 +18,13 @@ const sendDiscordMessage = async (message) => {
       message.to,
       message.from,
       message.timestamp,
-      message.tokenId
+      message.tokenId,
     );
     const returnMessage = await discordMessage;
-    const messsageInfo = await channel.send({ embeds: [returnMessage] });
-    return messsageInfo;
+    return channel.send({ embeds: [returnMessage] });
   } catch (e) {
     console.error(e);
+    return 'An error occurred.';
   }
 };
 
