@@ -6,6 +6,7 @@ const { readFile } = require("fs/promises");
 const {
   checkDataDuplicate,
   insertRecordToMongo,
+  getConnection,
 } = require("./handlers/mongoHandler");
 const { sendDiscordMessage } = require("./handlers/discordHandler");
 const { sendTweet } = require("./handlers/twitterHandler");
@@ -36,6 +37,8 @@ let getEvents = async () => {
     },
   };
 
+  const mongoClient = await getConnection();
+
   // Setting Infura as the Web Provider
   const web3 = new Web3(process.env.WEB3_PROVIDER);
   web3.setProvider(
@@ -56,7 +59,7 @@ let getEvents = async () => {
   // Listening for "Transfer" event
   myContract.events
     .Transfer({
-      fromBlock: 14675025//await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
+      fromBlock: await web3.eth.getBlockNumber(), // Gets the latest block everytime when the app is started. Will start listening to events that occur after this Block.
     })
     .on("connected", function (subscriptionId) {
       console.log({ subscriptionId });
@@ -77,8 +80,9 @@ let getEvents = async () => {
           log.topics[0] ===
             "0xc4109843e0b7d514e4c093114b863f8e7d8d9a458c372cd51bfe526b588006c9" &&
           (log.topics[1]?.toLowerCase() ==
-            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase() || log.topics[2]?.toLowerCase() ==
-            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase()) 
+            web3.utils.padLeft(res.returnValues.from, 64).toLowerCase() ||
+            log.topics[2]?.toLowerCase() ==
+              web3.utils.padLeft(res.returnValues.from, 64).toLowerCase())
         ) {
           const decodedParameters = web3.eth.abi.decodeParameters(
             typesArray,
@@ -109,13 +113,17 @@ let getEvents = async () => {
               console.log({ message });
               try {
                 const isDuplicate = await checkDataDuplicate(
+                  mongoClient,
                   message.from,
                   message.to,
                   message.timestamp,
                   message.txHash
                 );
                 if (!isDuplicate) {
-                  const newRecord = await insertRecordToMongo(message);
+                  const newRecord = await insertRecordToMongo(
+                    mongoClient,
+                    message
+                  );
                   console.log({
                     message: `Adding transaction to database with id: ${newRecord.insertedId.toString()}`,
                   });

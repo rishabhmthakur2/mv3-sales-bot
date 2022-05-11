@@ -12,9 +12,16 @@ const mongoClient = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-const getCollection = async () => {
+const getConnection = async () => {
   try {
-    await mongoClient.connect();
+    return await mongoClient.connect();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const getCollection = async (mongoClient) => {
+  try {
     const database = mongoClient.db("mv3");
     const collection = database.collection("mv3-sales");
     return collection;
@@ -23,9 +30,9 @@ const getCollection = async () => {
   }
 };
 
-const checkDataDuplicate = async (from, to, timestamp, txHash) => {
+const checkDataDuplicate = async (mongoClient, from, to, timestamp, txHash) => {
   try {
-    const collection = await getCollection();
+    const collection = await getCollection(mongoClient);
     // Checking if the there was a sync error and the same transaction already exists in the databse
     const previousRecords = await collection.findOne({
       from,
@@ -36,7 +43,7 @@ const checkDataDuplicate = async (from, to, timestamp, txHash) => {
     if (previousRecords == undefined) {
       return false;
     } else {
-      console.log({message: `Transaction is a duplicate`});
+      console.log({ message: `Transaction is a duplicate` });
       return true;
     }
   } catch (e) {
@@ -44,9 +51,9 @@ const checkDataDuplicate = async (from, to, timestamp, txHash) => {
   }
 };
 
-const insertRecordToMongo = async (message) => {
+const insertRecordToMongo = async (mongoClient, message) => {
   try {
-    const collection = await getCollection();
+    const collection = await getCollection(mongoClient);
     const newRecord = await collection.insertOne(message);
     return newRecord;
   } catch (e) {
@@ -57,4 +64,5 @@ const insertRecordToMongo = async (message) => {
 module.exports = {
   checkDataDuplicate,
   insertRecordToMongo,
+  getConnection,
 };
